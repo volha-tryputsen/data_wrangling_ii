@@ -1,0 +1,134 @@
+---
+title: "Reading Data"
+author: "Volha Tryputsen"
+date: "October 23, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(rvest)
+library(httr)
+```
+
+## Scraping
+
+### NSDUH Table
+
+```{r}
+url = "http://samhda.s3-us-gov-west-1.amazonaws.com/s3fs-public/field-uploads/2k15StateFiles/NSDUHsaeShortTermCHG2015.htm"
+
+drug_use_xml = read_html(url)
+```
+
+That's step one!
+
+```{r}
+drug_use_xml %>%
+  html_nodes(css = "table")
+```
+
+Got the table(s) ...
+
+```{r}
+table_marj = (drug_use_xml %>% html_nodes(css = "table"))[[1]] %>%
+  html_table() %>%
+  .[-1,] %>% 
+  as_tibble()
+```
+
+Now I have exactly the table I want!!
+
+### NYC Cost of living table
+
+I'd like to understand the impact of my life choices by looking at cost of living in NYC compared to the rest of the US. The table below should help!
+
+```{r}
+url = "https://www.bestplaces.net/cost_of_living/city/new_york/new_york"
+
+nyc_cost_xml = read_html(url)
+
+nyc_cost_table = (nyc_cost_xml %>% html_nodes(css = "table"))[[2]] %>% 
+  html_table(header = TRUE)
+```
+
+### HP_SS Cast
+
+I want the names!!
+
+```{r}
+url = "http://www.imdb.com/title/tt0241527/"
+
+hpss_xml = read_html(url)
+
+hpss_cast = hpss_xml %>%
+  html_nodes(css = ".itemprop .itemprop") %>% 
+  html_text()
+```
+
+### Toothbrush reviews
+
+Dental [hygiene](https://www.google.com/search?&rls=en&q=hygiene&ie=UTF-8&oe=UTF-8).
+
+```{r}
+url = "https://www.amazon.com/Philips-Sonicare-rechargeable-toothbrush-HX6211/product-reviews/B00YAR7ZFM/ref=cm_cr_arp_d_viewopt_srt?ie=UTF8&reviewerType=all_reviews&sortBy=recent&pageNumber=2"
+
+toothbrush_xml = read_html(url)
+
+toothbrush_titles = toothbrush_xml %>%
+  html_nodes(css = "#cm_cr-review_list .review-title") %>% 
+  html_text()
+
+toothbrush_stars = toothbrush_xml %>%
+  html_nodes(css = "#cm_cr-review_list .review-rating") %>% 
+  html_text()
+
+toothbrush_df = data_frame(
+  title = toothbrush_titles,
+  stars = toothbrush_stars
+)
+
+```
+
+
+
+
+## APIs
+
+### Water use data
+
+Getting water data via the API. 
+
+```{r}
+nyc_water = GET("https://data.cityofnewyork.us/resource/waf7-5gvc.csv") %>%
+  content("parsed")
+```
+
+Getting the same data using JSON ...
+
+```{r}
+nyc_water = GET("https://data.cityofnewyork.us/resource/waf7-5gvc.json") %>% 
+  content("text") %>%
+  jsonlite::fromJSON() %>%
+  as_tibble()
+```
+
+### BRFSS
+
+```{r}
+brfss = 
+  GET("https://chronicdata.cdc.gov/api/views/hn4x-zwk7/rows.csv?accessType=DOWNLOAD") %>% 
+  content("parsed")
+```
+
+
+### Catch the pokemon (data)
+
+```{r}
+poke = GET("http://pokeapi.co/api/v2/pokemon/1") %>%
+  content()
+
+names(poke)
+```
