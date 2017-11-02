@@ -20,7 +20,8 @@ Steps:
 2. choose your css
 3. convert html using the css
 
-## NSDUH Table
+## example 1
+NSDUH Table
 1. get html with **read_html()**
 ```{r example1_step1}
 url = "http://samhda.s3-us-gov-west-1.amazonaws.com/s3fs-public/field-uploads/2k15StateFiles/NSDUHsaeShortTermCHG2015.htm"
@@ -59,12 +60,13 @@ Now I have exactly the table I want! Needs cleaning though.
 
 
 
-## NYC Cost of living table
+## example 2 
+NYC Cost of living table
 
 I'd like to understand the impact of my life choices by looking at cost of living in NYC compared to the rest of the US. The table below should help!
 
 **url %>% read_html() %>% html_nodes(css = "table") %>% html_table()**
-
+** extract html %>% get the nodes with css selector %>% turn them into output(table, text..)**
 ```{r example2}
 url = "https://www.bestplaces.net/cost_of_living/city/new_york/new_york"
 nyc_cost_xml = read_html(url)
@@ -74,13 +76,15 @@ nyc_cost_table =
 ```
 
 
-### HP_SS Cast
 
-I want the names!!
+# CSS Selectors
+Different kinds of css selectors
+
+## example 1 - harry poter cast names  
+**Extract text**
 
 ```{r}
 url = "http://www.imdb.com/title/tt0241527/"
-
 hpss_xml = read_html(url)
 
 hpss_cast = hpss_xml %>%
@@ -88,7 +92,9 @@ hpss_cast = hpss_xml %>%
   html_text()
 ```
 
-### Toothbrush reviews
+
+## example 2 - toothbrushe review from amazon
+**exract reviews titles**
 
 Dental [hygiene](https://www.google.com/search?&rls=en&q=hygiene&ie=UTF-8&oe=UTF-8).
 
@@ -97,6 +103,11 @@ url = "https://www.amazon.com/Philips-Sonicare-rechargeable-toothbrush-HX6211/pr
 
 toothbrush_xml = read_html(url)
 
+# .a-color-base css tag in unstable in terms of interaction with amazon
+toothbrush_titles = toothbrush_xml %>%
+  html_nodes(css = "#cm_cr-review_list .a-color-base") %>% 
+  html_text()
+#instead of .a-color-base, use .review-title, because it is more stable
 toothbrush_titles = toothbrush_xml %>%
   html_nodes(css = "#cm_cr-review_list .review-title") %>% 
   html_text()
@@ -109,15 +120,13 @@ toothbrush_df = data_frame(
   title = toothbrush_titles,
   stars = toothbrush_stars
 )
-
 ```
 
 
 
 
-## APIs
-
-### Water use data
+# APIs
+## example 1 - water use data
 
 Getting water data via the API. 
 
