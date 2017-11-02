@@ -1,7 +1,7 @@
 ---
 title: "Reading Data"
 author: "Volha Tryputsen"
-date: "October 23, 2017"
+date: "October 23 - 25, 2017"
 output: html_document
 ---
 
@@ -9,19 +9,25 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
-library(rvest) 
-library(httr)
+library(rvest) # for scraping
+library(httr) # for http requests
 ```
 
+# Scraping  
 
-# Extracting tables - Scraping  
+* Find website  
+* choose html nodes using appropriate css 
+* convert html to desired output format: table, text etc.
+
+
+## Extracting tables   
 Steps:
 1. get html data
 2. choose your css
 3. convert html using the css
 
-## example 1
-NSDUH Table
+### example 1 - NSDUH 
+
 1. get html with **read_html()**
 ```{r example1_step1}
 url = "http://samhda.s3-us-gov-west-1.amazonaws.com/s3fs-public/field-uploads/2k15StateFiles/NSDUHsaeShortTermCHG2015.htm"
@@ -60,8 +66,7 @@ Now I have exactly the table I want! Needs cleaning though.
 
 
 
-## example 2 
-NYC Cost of living table
+### example 2 - NYC Cost of living   
 
 I'd like to understand the impact of my life choices by looking at cost of living in NYC compared to the rest of the US. The table below should help!
 
@@ -77,11 +82,11 @@ nyc_cost_table =
 
 
 
-# CSS Selectors
+## CSS selectors
 Different kinds of css selectors
 
-## example 1 - harry poter cast names  
-**Extract text**
+### example 1 - harry poter cast names  
+**extract text**
 
 ```{r}
 url = "http://www.imdb.com/title/tt0241527/"
@@ -93,7 +98,7 @@ hpss_cast = hpss_xml %>%
 ```
 
 
-## example 2 - toothbrushe review from amazon
+### example 2 - toothbrushe review from amazon  
 **exract reviews titles**
 
 Dental [hygiene](https://www.google.com/search?&rls=en&q=hygiene&ie=UTF-8&oe=UTF-8).
@@ -124,40 +129,46 @@ toothbrush_df = data_frame(
 
 
 
+# APIs 
+accessing data via web-API - a front-end software which makes a request to a server.  
 
-# APIs
-## example 1 - water use data
+## example 1 - NYC water consumption  
+NYC open data project.  
 
-Getting water data via the API. 
-
+* Getting water data via the API. 
 ```{r}
-nyc_water = GET("https://data.cityofnewyork.us/resource/waf7-5gvc.csv") %>%
+nyc_water = 
+  GET("https://data.cityofnewyork.us/resource/waf7-5gvc.csv") %>%
   content("parsed")
 ```
 
-Getting the same data using JSON ...
-
+* Getting the same data using JSON (when data doesnt fit into a nice rectangular shape)  
 ```{r}
-nyc_water = GET("https://data.cityofnewyork.us/resource/waf7-5gvc.json") %>% 
+nyc_water = 
+  GET("https://data.cityofnewyork.us/resource/waf7-5gvc.json") %>% 
   content("text") %>%
   jsonlite::fromJSON() %>%
   as_tibble()
 ```
 
-### BRFSS
+## example 2 - BRFSS
 
 ```{r}
 brfss = 
   GET("https://chronicdata.cdc.gov/api/views/hn4x-zwk7/rows.csv?accessType=DOWNLOAD") %>% 
   content("parsed")
+#View(brfss)
 ```
 
 
-### Catch the pokemon (data)
+## example 3 - catch the pokemon  
 
 ```{r}
-poke = GET("http://pokeapi.co/api/v2/pokemon/1") %>%
-  content()
+poke = 
+  GET("http://pokeapi.co/api/v2/pokemon/1") %>% # extract the data
+  content() # get the content
 
 names(poke)
+class(poke$forms) # list
+class(poke$name) # character
 ```
