@@ -2,7 +2,14 @@
 title: "Reading Data"
 author: "Volha Tryputsen"
 date: "October 23 - 25, 2017"
-output: html_document
+output: 
+  html_document:
+    theme: cosmo
+    highlight: haddock
+    toc: true
+    toc_float:
+      collapse: true
+      smooth_scroll: false
 ---
 
 ```{r setup, include=FALSE}
